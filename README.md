@@ -26,11 +26,15 @@ HTML:
 
 CSS:
 ```css
+/* Opt-in to customizable select */
 @supports (appearance: base-select) {
   select, ::picker(select) {
     appearance: base-select;
   }
+}
 
+/* Styling picker */
+@supports (appearance: base-select) {
   ::picker(select) {
     border-radius: 0.5em;
   }
@@ -40,6 +44,23 @@ CSS:
     border-radius: 0.5em;
   }
 }
+
+/* Styling checked option elements */
+@supports (appearance: base-select) {
+  option:checked {
+    background-color: green;
+  }
+}
+@supports not (appearance: base-select) {
+  customizable-select-polyfill-option:state(checked) {
+    background-color: green;
+  }
+}
+```
+
+JS:
+```javascript
+TODO: add method to transform polyfill into a real select.
 ```
 
 # Browser support

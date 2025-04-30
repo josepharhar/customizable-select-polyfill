@@ -79,6 +79,8 @@ class CustomizableSelectPolyfill extends HTMLElement {
     }
     `;
     root.appendChild(style);
+
+    this.descendantSelectedcontents = new Set();
   }
 
   connectedCallback() {
@@ -88,6 +90,7 @@ class CustomizableSelectPolyfill extends HTMLElement {
       subtree: false
     });
     manuallyAssignSlots();
+    this.setAttribute('tabindex', '0');
   }
 
   disconnectedCallback() {
@@ -121,6 +124,14 @@ class CustomizableSelectPolyfill extends HTMLElement {
     this.optionSlot.assign(otherChildren);
   }
 
+  selectedcontentAdded(selectedcontent) {
+    this.descendantSelectedcontents.add(selectedcontent);
+  }
+
+  selectedcontentRemoved(selectedcontent) {
+    this.descendantSelectedcontents.delete(selectedcontent);
+  }
+
   // TODO add getters like value, selectedOptions, etc.
 };
 
@@ -152,6 +163,7 @@ class CustomizableSelectPolyfillOption extends HTMLElement {
   }
 
   connectedCallback() {
+    this.setAttribute('tabindex', '0');
     // TODO add event listeners
   }
 
@@ -159,13 +171,57 @@ class CustomizableSelectPolyfillOption extends HTMLElement {
   }
 };
 
+// TODO consider implementing label attribute with these styles: padding-inline:0.5em
+class CustomizableSelectPolyfillOptgroup extends HTMLElement {
+  constructor() {
+    const root = this.attachShadow({mode: 'open'});
+    const slot = document.createElement('slot');
+    root.appendChild(slot);
+    const style = document.createElement('style');
+    style.textContent = `
+      :host {
+        font-weight: bolder;
+      }
+
+      :host option {
+        font-weight: normal;
+      }
+
+      :host legend {
+        padding-inline: 0.5em;
+        min-block-size: 1lh;
+      }
+    `;
+    root.appendChild(style);
+  }
+};
+
 class CustomizableSelectPolyfillSelectedContent extends HTMLElement {
+  connectedCallback() {
+    this.select = this.firstAncestorSelect();
+    this.select.selectedcontentAdded(this);
+  }
+
+  disconnectedCallback() {
+    this.select.selectedcontentRemoved(this);
+  }
+
+  firstAncestorSelect() {
+    for (let parent = this.parentNode; parent; parent = parent.parentNode) {
+      if (parent instanceof CustomizableSelectPolyfill) {
+        return parent;
+      }
+    }
+    return null;
+  }
 };
 
 customElements.define('customizable-select-polyfill', CustomizableSelectPolyfill);
 customElements.define('customizable-select-polyfill-option', CustomizableSelectPolyfillOption);
+customElements.define('customizable-select-polyfill-optgroup', CustomizableSelectPolyfillOptgroup);
 customElements.define('customizable-select-polyfill-selected-content', CustomizableSelectPolyfillSelectedContent);
 
 // TODO provide a method to upgrade all polyfills to real <select> elements if
 // there is customizable select support detected.
 // TODO export things
+// TODO set aria attributes
