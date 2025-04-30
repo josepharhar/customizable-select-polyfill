@@ -1,20 +1,21 @@
 class CustomizableSelectPolyfill extends HTMLElement {
   constructor() {
+    super();
     const root = this.attachShadow({mode: 'open', slotAssignment: 'manual'});
 
     this.buttonSlot = document.createElement('slot');
     this.buttonSlot.id = 'select-button';
     root.appendChild(this.buttonSlot);
 
-    this.popover = document.createElement('div');
-    this.popover.setAttribute('popover', 'auto');
-    this.popover.id = 'picker';
-    this.popover.part = 'picker';
-    root.appendChild(this.popover);
+    this.picker = document.createElement('div');
+    this.picker.setAttribute('popover', 'auto');
+    this.picker.id = 'picker';
+    this.picker.part = 'picker';
+    root.appendChild(this.picker);
 
     this.optionSlot = document.createElement('slot');
     this.optionSlot.id = 'select-popover-options';
-    this.popover.appendChild(this.optionSlot);
+    this.picker.appendChild(this.optionSlot);
 
     this.mutationObserver = new MutationObserver(this.mutationObserverCallback.bind(this));
 
@@ -41,13 +42,13 @@ class CustomizableSelectPolyfill extends HTMLElement {
       interactivity: inert;
     }
 
-    :host:enabled:hover {
+    :host:hover {
       background-color: color-mix(in lab, currentColor 10%, transparent);
     }
-    :host:enabled:active {
+    :host:active {
       background-color: color-mix(in lab, currentColor 20%, transparent);
     }
-    :host:disabled {
+    :host[disabled] {
       color: color-mix(in srgb, currentColor 50%, transparent);
     }
 
@@ -89,7 +90,7 @@ class CustomizableSelectPolyfill extends HTMLElement {
       childList: true,
       subtree: false
     });
-    manuallyAssignSlots();
+    this.manuallyAssignSlots();
     this.setAttribute('tabindex', '0');
   }
 
@@ -119,9 +120,13 @@ class CustomizableSelectPolyfill extends HTMLElement {
         otherChildren.push(child);
       }
     }
-    firstButton.setAttribute('inert', '');
-    this.buttonSlot.assign(firstButton);
-    this.optionSlot.assign(otherChildren);
+    if (firstButton) {
+      firstButton.setAttribute('inert', '');
+      this.buttonSlot.assign(firstButton);
+    } else {
+      this.buttonSlot.assign();
+    }
+    this.optionSlot.assign(...otherChildren);
   }
 
   selectedcontentAdded(selectedcontent) {
@@ -137,6 +142,7 @@ class CustomizableSelectPolyfill extends HTMLElement {
 
 class CustomizableSelectPolyfillOption extends HTMLElement {
   constructor() {
+    super();
     const root = this.attachShadow({mode: 'open'});
     const slot = document.createElement('slot');
     root.appendChild(slot);
@@ -174,6 +180,7 @@ class CustomizableSelectPolyfillOption extends HTMLElement {
 // TODO consider implementing label attribute with these styles: padding-inline:0.5em
 class CustomizableSelectPolyfillOptgroup extends HTMLElement {
   constructor() {
+    super();
     const root = this.attachShadow({mode: 'open'});
     const slot = document.createElement('slot');
     root.appendChild(slot);
