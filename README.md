@@ -3,6 +3,8 @@
 This is a polyfill for the customizable select feature:
 [MDN](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Customizable_select)
 
+Unlike a real `<select>` element, this polyfill does not support autofill.
+
 # Usage
 
 HTML:
@@ -42,4 +44,12 @@ CSS:
 
 # Browser support
 
-The newest feature this polyfill uses is manual slot assignment: [MDN](https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/slotAssignment)
+This polyfill uses several new browser features:
+- [Popover](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/popover)
+- [Anchor positioning](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_anchor_positioning)
+- [Custom state pseudo-classes](https://developer.mozilla.org/en-US/docs/Web/API/CustomStateSet)
+
+Please file an issue if you want older browser support.
+
+TODO: Use anchor positioning polyfill, and possibly popover as well, or at least
+make them work well when other polyfills are used.
