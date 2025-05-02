@@ -1,0 +1,5 @@
+customizable-select-polyfill > button:first-child {
+	all: unset;
+	display: contents;
+	interactivity: inert;
+}

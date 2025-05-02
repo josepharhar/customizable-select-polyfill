@@ -42,14 +42,9 @@ class CustomizableSelectPolyfill extends HTMLElement {
       gap: 0.5em;
       border-radius: 0.5em;
       user-select: none;
+      box-sizing: border-box;
 
       anchor-name: --select;
-    }
-
-    :host > button:first-child {
-      all: unset;
-      display: contents;
-      interactivity: inert;
     }
 
     :host(:hover) {
@@ -96,6 +91,7 @@ class CustomizableSelectPolyfill extends HTMLElement {
     this.descendantSelectedcontents = new Set();
 
     this.clickEventListenerInstance = this.clickEventListener.bind(this);
+    this.toggleEventListenerInstance = this.toggleEventListener.bind(this);
   }
 
   connectedCallback() {
@@ -108,11 +104,13 @@ class CustomizableSelectPolyfill extends HTMLElement {
     this.setAttribute('tabindex', '0');
 
     this.addEventListener('click', this.clickEventListenerInstance);
+    this.picker.addEventListener('toggle', this.toggleEventListenerInstance);
   }
 
   disconnectedCallback() {
     this.mutationObserver.disconnect();
     this.removeEventListener('click', this.clickEventListenerInstance);
+    this.picker.removeEventListener('toggle', this.toggleEventListenerInstance);
   }
 
   clickEventListener(event) {
@@ -129,6 +127,14 @@ class CustomizableSelectPolyfill extends HTMLElement {
 
     if (!wasClickInPicker()) {
       this.picker.showPopover();
+    }
+  }
+
+  toggleEventListener(event) {
+    if (event.newState == 'open') {
+      this.classList.add('open');
+    } else {
+      this.classList.remove('open');
     }
   }
 
@@ -156,6 +162,11 @@ class CustomizableSelectPolyfill extends HTMLElement {
 
     if (selectedOptionChanged) {
       this.innerElement.textContent = this.selectedOption.textContent;
+
+      // The real implementation doesn't do this, but it also clones when
+      // parsing </option> end tags which we can't do from userland, so this
+      // will work.
+      this.cloneSelectedcontent();
     }
   }
 
@@ -179,11 +190,30 @@ class CustomizableSelectPolyfill extends HTMLElement {
   }
 
   selectedcontentAdded(selectedcontent) {
+    const wasEmpty = this.descendantSelectedcontents.size;
     this.descendantSelectedcontents.add(selectedcontent);
+    if (wasEmpty) {
+      this.cloneSelectedcontent();
+    }
   }
 
   selectedcontentRemoved(selectedcontent) {
     this.descendantSelectedcontents.delete(selectedcontent);
+  }
+
+  cloneSelectedcontent() {
+    if (!this.descendantSelectedcontents.size) {
+      return;
+    }
+    const selectedcontent = this.descendantSelectedcontents.keys().next().value;
+    while (selectedcontent.firstChild) {
+      selectedcontent.firstChild.remove();
+    }
+    if (this.selectedOption) {
+      for (const child of this.selectedOption.childNodes) {
+        selectedcontent.appendChild(child.cloneNode(true));
+      }
+    }
   }
 
   optionAdded(option) {
@@ -217,7 +247,12 @@ class CustomizableSelectPolyfill extends HTMLElement {
     this.innerElement.textContent = option
       ? option.textContent
       : '';
+
+    // TODO don't dispatch change event during option attachment?
+    // TODO fire input event also?
     this.dispatchEvent(new Event('change'));
+
+    this.cloneSelectedcontent();
   }
 
   hidePicker() {
@@ -298,9 +333,9 @@ class CustomizableSelectPolyfillOption extends HTMLElement {
 
   setChecked(checked) {
     if (checked) {
-      this.setAttribute('checked', '');
+      this.classList.add('checked');
     } else {
-      this.removeAttribute('checked');
+      this.classList.remove('checked');
     }
   }
 };
@@ -332,6 +367,10 @@ class CustomizableSelectPolyfillOptgroup extends HTMLElement {
 };
 
 class CustomizableSelectPolyfillSelectedContent extends HTMLElement {
+  constructor() {
+    super();
+  }
+
   connectedCallback() {
     this.select = firstAncestorSelect(this);
     this.select.selectedcontentAdded(this);
@@ -354,7 +393,7 @@ function firstAncestorSelect(node) {
 customElements.define('customizable-select-polyfill', CustomizableSelectPolyfill);
 customElements.define('customizable-select-polyfill-option', CustomizableSelectPolyfillOption);
 customElements.define('customizable-select-polyfill-optgroup', CustomizableSelectPolyfillOptgroup);
-customElements.define('customizable-select-polyfill-selected-content', CustomizableSelectPolyfillSelectedContent);
+customElements.define('customizable-select-polyfill-selectedcontent', CustomizableSelectPolyfillSelectedContent);
 
 // TODO provide a method to upgrade all polyfills to real <select> elements if
 // there is customizable select support detected.

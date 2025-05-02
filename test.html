@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <script src="customizable-select-polyfill.js"></script>
+<link rel=stylesheet href="customizable-select-polyfill.css">
 
 <style>
 table {
@@ -21,10 +22,6 @@ th, td {
 
 td:last-of-type {
   text-align: center;
-}
-
-tbody > tr:nth-of-type(even) {
-  background-color: rgb(237 238 242);
 }
 
 tfoot th {
@@ -62,5 +59,73 @@ select, ::picker(select) {
         </customizable-select-polyfill>
       </td>
     </tr>
+
+    <tr class=twitter>
+      <td>
+				<select aria-label=Month>
+					<button>
+						<div>
+							<div class=label aria-hidden=true>Month</div>
+							<selectedcontent></selectedcontent>
+						</div>
+					</button>
+					<option>January</option>
+					<option>February</option>
+					<option>March</option>
+					<option>April</option>
+				</select>
+      </td>
+      <td>
+				<customizable-select-polyfill aria-label=Month>
+					<button>
+						<div>
+							<div class=label aria-hidden=true>Month</div>
+							<customizable-select-polyfill-selectedcontent></customizable-select-polyfill-selectedcontent>
+						</div>
+					</button>
+					<customizable-select-polyfill-option>January</customizable-select-polyfill-option>
+					<customizable-select-polyfill-option>February</customizable-select-polyfill-option>
+					<customizable-select-polyfill-option>March</customizable-select-polyfill-option>
+					<customizable-select-polyfill-option>April</customizable-select-polyfill-option>
+				</customizable-select-polyfill>
+      </td>
+    </tr>
   </tbody>
 </table>
+
+<style>
+.twitter {
+  font-family: system-ui;
+  font-size: 18px;
+  --accent-color: rgb(29, 155, 240);
+}
+.twitter,
+.twitter ::picker(select),
+.twitter ::part(picker) {
+  background-color: black;
+  color: white;
+}
+.twitter select,
+.twitter ::picker(select),
+.twitter customizable-select-polyfill,
+.twitter ::part(picker) {
+  appearance: base-select;
+  border-color: var(--accent-color);
+}
+.twitter select,
+.twitter customizable-select-polyfill {
+  width: 170px;
+}
+.twitter .label {
+  font-size: 14px;
+  color: var(--accent-color);
+}
+.twitter ::picker-icon,
+.twitter customizable-select-polyfill::after {
+  content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyZW0nIGhlaWdodD0nMmVtJyB2aWV3Qm94PScwIDAgMjQgMjQnPjxwYXRoIGZpbGw9J3JnYigyOSwgMTU1LCAyNDApJyBkPSdNNy40MSA4LjU5TDEyIDEzLjE3bDQuNTktNC41OEwxOCAxMGwtNiA2bC02LTZ6Jy8+PC9zdmc+");
+}
+.twitter ::checkmark,
+.twitter customizable-select-polyfill-option::before {
+  color: var(--accent-color);
+}
+</style>
