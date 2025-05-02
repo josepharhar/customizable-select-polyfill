@@ -92,6 +92,8 @@ class CustomizableSelectPolyfill extends HTMLElement {
 
     this.clickEventListenerInstance = this.clickEventListener.bind(this);
     this.toggleEventListenerInstance = this.toggleEventListener.bind(this);
+
+    // TODO attachInternals and figure out what else to do for form association
   }
 
   connectedCallback() {
