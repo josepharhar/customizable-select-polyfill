@@ -42,6 +42,7 @@ class CustomizableSelectPolyfill extends HTMLElement {
       gap: 0.5em;
       border-radius: 0.5em;
       user-select: none;
+      -webkit-user-select: none;
       box-sizing: border-box;
 
       anchor-name: --select;

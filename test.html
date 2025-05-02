@@ -164,14 +164,23 @@ select, ::picker(select) {
   font-size: 18px;
   --accent-color: rgb(29, 155, 240);
 }
-.twitter,
-.twitter ::picker(select),
-.twitter ::part(picker) {
+@supports (appearance: base-select) {
+  .twitter ::picker(select) {
+    background-color: black;
+    color: white;
+  }
+}
+.twitter, .twitter ::part(picker) {
   background-color: black;
   color: white;
 }
+@supports (appearance: base-select) {
+  .twitter ::picker(select) {
+    appearance: base-select;
+    border-color: var(--accent-color);
+  }
+}
 .twitter select,
-.twitter ::picker(select),
 .twitter customizable-select-polyfill,
 .twitter ::part(picker) {
   appearance: base-select;
@@ -185,11 +194,19 @@ select, ::picker(select) {
   font-size: 14px;
   color: var(--accent-color);
 }
-.twitter ::picker-icon,
+@supports (appearance: base-select) {
+  .twitter ::picker-icon {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyZW0nIGhlaWdodD0nMmVtJyB2aWV3Qm94PScwIDAgMjQgMjQnPjxwYXRoIGZpbGw9J3JnYigyOSwgMTU1LCAyNDApJyBkPSdNNy40MSA4LjU5TDEyIDEzLjE3bDQuNTktNC41OEwxOCAxMGwtNiA2bC02LTZ6Jy8+PC9zdmc+");
+  }
+}
 .twitter customizable-select-polyfill::after {
   content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyZW0nIGhlaWdodD0nMmVtJyB2aWV3Qm94PScwIDAgMjQgMjQnPjxwYXRoIGZpbGw9J3JnYigyOSwgMTU1LCAyNDApJyBkPSdNNy40MSA4LjU5TDEyIDEzLjE3bDQuNTktNC41OEwxOCAxMGwtNiA2bC02LTZ6Jy8+PC9zdmc+");
 }
-.twitter ::checkmark,
+@supports (appearance: base-select) {
+  .twitter ::checkmark {
+    color: var(--accent-color);
+  }
+}
 .twitter customizable-select-polyfill-option::before {
   color: var(--accent-color);
 }
@@ -202,8 +219,12 @@ select, ::picker(select) {
   color: var(--accent-color);
 }
 
+@supports (appearance: base-select) {
+  .material ::picker(select) {
+    width: var(--width);
+  }
+}
 .material select,
-.material ::picker(select),
 .material customizable-select-polyfill,
 .material ::part(picker) {
   width: var(--width);
@@ -215,7 +236,14 @@ select, ::picker(select) {
   border-radius: 8px;
 }
 
-.material ::picker(select),
+@supports (appearance: base-select) {
+  .material ::picker(select) {
+    border: none;
+    padding-block: 6px;
+    border-radius: 8px;
+    box-shadow: 0px 12.8px 28.8px rgba(0, 0, 0, 0.13), 0px 0px 9.2px rgba(0, 0, 0, 0.11);
+  }
+}
 .material ::part(picker) {
   border: none;
   padding-block: 6px;
@@ -223,7 +251,11 @@ select, ::picker(select) {
   box-shadow: 0px 12.8px 28.8px rgba(0, 0, 0, 0.13), 0px 0px 9.2px rgba(0, 0, 0, 0.11);
 }
 
-.material ::picker-icon,
+@supports (appearance: base-select) {
+  .material ::picker-icon {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iMjRweCIgZmlsbD0iYmx1ZSI+PHBhdGggZD0iTTAgMGgyNHYyNEgwVjB6IiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTcgMTBsNSA1IDUtNUg3eiIvPjwvc3ZnPg==");
+  }
+}
 .material customizable-select-polyfill::after {
   content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iMjRweCIgZmlsbD0iYmx1ZSI+PHBhdGggZD0iTTAgMGgyNHYyNEgwVjB6IiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTcgMTBsNSA1IDUtNUg3eiIvPjwvc3ZnPg==");
 }
@@ -238,7 +270,13 @@ select, ::picker(select) {
   color: var(--accent-color);
 }
 
-.material option::checkmark,
+@supports (appearance: base-select) {
+  .material option::checkmark {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iMjRweCIgZmlsbD0iYmx1ZSI+PHBhdGggZD0iTTAgMGgyNHYyNEgwVjB6IiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTkgMTYuMkw0LjggMTJsLTEuNCAxLjRMOSAxOSAyMSA3bC0xLjQtMS40TDkgMTYuMnoiLz48L3N2Zz4=");
+    order: 2;
+    color: var(--accent-color);
+  }
+}
 .material customizable-select-polyfill-option::before {
   content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iMjRweCIgZmlsbD0iYmx1ZSI+PHBhdGggZD0iTTAgMGgyNHYyNEgwVjB6IiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTkgMTYuMkw0LjggMTJsLTEuNCAxLjRMOSAxOSAyMSA3bC0xLjQtMS40TDkgMTYuMnoiLz48L3N2Zz4=");
   order: 2;
@@ -259,3 +297,21 @@ select, ::picker(select) {
   gap:0.5em;
 }
 </style>
+
+<script type="module">
+  if (!("anchorName" in document.documentElement.style)) {
+    const { default: polyfill } = await import("https://unpkg.com/@oddbird/css-anchor-positioning/dist/css-anchor-positioning-fn.js");
+    const elements = document.querySelectorAll('customizable-select-polyfill').flatMap(polyfillElement => {
+      return [
+        polyfillElement,
+        polyfillElement.shadowRoot,
+        polyfillElement.shadowRoot.querySelector('#picker')
+      ];
+    });
+    polyfill({
+      elements,
+      excludeInlineStyles: false,
+      useAnimationFrame: false,
+    });
+  }
+</script>
