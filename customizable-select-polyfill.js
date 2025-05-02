@@ -42,6 +42,8 @@ class CustomizableSelectPolyfill extends HTMLElement {
       gap: 0.5em;
       border-radius: 0.5em;
       user-select: none;
+
+      anchor-name: --select;
     }
 
     :host > button:first-child {
@@ -50,13 +52,13 @@ class CustomizableSelectPolyfill extends HTMLElement {
       interactivity: inert;
     }
 
-    :host:hover {
+    :host(:hover) {
       background-color: color-mix(in lab, currentColor 10%, transparent);
     }
-    :host:active {
+    :host(:active) {
       background-color: color-mix(in lab, currentColor 20%, transparent);
     }
-    :host[disabled] {
+    :host([disabled]) {
       color: color-mix(in srgb, currentColor 50%, transparent);
     }
 
@@ -85,11 +87,15 @@ class CustomizableSelectPolyfill extends HTMLElement {
         block-start span-inline-end,
         block-end span-inline-start,
         block-start span-inline-end;
+
+      position-anchor: --select;
     }
     `;
     root.appendChild(style);
 
     this.descendantSelectedcontents = new Set();
+
+    this.clickEventListenerInstance = this.clickEventListener.bind(this);
   }
 
   connectedCallback() {
@@ -100,10 +106,30 @@ class CustomizableSelectPolyfill extends HTMLElement {
     });
     this.manuallyAssignSlots();
     this.setAttribute('tabindex', '0');
+
+    this.addEventListener('click', this.clickEventListenerInstance);
   }
 
   disconnectedCallback() {
     this.mutationObserver.disconnect();
+    this.removeEventListener('click', this.clickEventListenerInstance);
+  }
+
+  clickEventListener(event) {
+    const wasClickInPicker = () => {
+      for (const node of event.composedPath()) {
+        if (node == this.picker) {
+          return true;
+        } else if (node == this) {
+          return false;
+        }
+      }
+      return false;
+    }
+
+    if (!wasClickInPicker()) {
+      this.picker.showPopover();
+    }
   }
 
   mutationObserverCallback(mutationList) {
@@ -178,11 +204,24 @@ class CustomizableSelectPolyfill extends HTMLElement {
     if (!option && this.options.size()) {
       option = this.options[0];
     }
+    if (this.selectedOption == option) {
+      return;
+    }
+    if (this.selectedOption) {
+      this.selectedOption.setChecked(false);
+    }
+    if (option) {
+      option.setChecked(true);
+    }
     this.selectedOption = option;
     this.innerElement.textContent = option
       ? option.textContent
       : '';
     this.dispatchEvent(new Event('change'));
+  }
+
+  hidePicker() {
+    this.picker.hidePopover();
   }
 
   // TODO add getters like value, selectedOptions, etc.
@@ -209,13 +248,25 @@ class CustomizableSelectPolyfillOption extends HTMLElement {
         content: '\\2713' / '';
       }
 
-      :host:not(:state(checked))::before {
+      :host(:not(.checked))::before {
         visibility: hidden;
+      }
+
+      :host(:hover) {
+        background-color: color-mix(in lab, currentColor 10%, transparent);
+      }
+      :host(:active) {
+        background-color: color-mix(in lab, currentColor 20%, transparent);
+      }
+      :host([disabled]) {
+        color: color-mix(in srgb, currentColor 50%, transparent);
       }
     `;
     root.appendChild(style);
 
     this.select = null;
+
+    this.clickEventListenerInstance = this.clickEventListener.bind(this);
   }
 
   connectedCallback() {
@@ -226,13 +277,30 @@ class CustomizableSelectPolyfillOption extends HTMLElement {
       this.select.optionAdded(this);
     }
 
-    // TODO add event listeners
+    this.addEventListener('click', this.clickEventListenerInstance);
   }
 
   disconnectedCallback() {
     if (this.select) {
       this.select.optionRemoved(this);
       this.select = null;
+    }
+    this.setChecked(false);
+    this.removeEventListener('click', this.clickEventListenerInstance);
+  }
+
+  clickEventListener() {
+    if (this.select) {
+      this.select.selectOption(this);
+      this.select.hidePicker();
+    }
+  }
+
+  setChecked(checked) {
+    if (checked) {
+      this.setAttribute('checked', '');
+    } else {
+      this.removeAttribute('checked');
     }
   }
 };

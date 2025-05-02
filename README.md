@@ -5,6 +5,14 @@ This is a polyfill for the customizable select feature:
 
 Unlike a real `<select>` element, this polyfill does not support autofill.
 
+This polyfill does not implement support for the `label` attribute on the
+`<option>` element because I do not recommend using the `label` attribute at
+all: [OpenUI](https://github.com/openui/open-ui/issues/1115)
+
+This polyfill does not implement the click-and-drag to select an option gesture,
+nor the behavior of opening the picker on mousedown instead of mouseup, due to
+issues with popover light dismiss.
+
 # Usage
 
 HTML:
@@ -52,7 +60,7 @@ CSS:
   }
 }
 @supports not (appearance: base-select) {
-  customizable-select-polyfill-option:state(checked) {
+  customizable-select-polyfill-option.checked {
     background-color: green;
   }
 }
