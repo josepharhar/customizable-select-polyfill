@@ -7,6 +7,10 @@ class CustomizableSelectPolyfill extends HTMLElement {
     this.buttonSlot.id = 'select-button';
     root.appendChild(this.buttonSlot);
 
+    this.innerElement = document.createElement('div');
+    this.innerElement.id = 'inner-element';
+    this.buttonSlot.appendChild(this.innerElement);
+
     this.picker = document.createElement('div');
     this.picker.setAttribute('popover', 'auto');
     this.picker.id = 'picker';
@@ -18,6 +22,10 @@ class CustomizableSelectPolyfill extends HTMLElement {
     this.picker.appendChild(this.optionSlot);
 
     this.mutationObserver = new MutationObserver(this.mutationObserverCallback.bind(this));
+
+    // this.options contains all descendant option elements and is updated when
+    // option elements are inserted to the document.
+    this.options = new Set();
 
     const style = document.createElement('style');
     style.textContent = `
@@ -88,7 +96,7 @@ class CustomizableSelectPolyfill extends HTMLElement {
     this.mutationObserver.observe(this, {
       attributes: false,
       childList: true,
-      subtree: false
+      subtree: true 
     });
     this.manuallyAssignSlots();
     this.setAttribute('tabindex', '0');
@@ -99,14 +107,29 @@ class CustomizableSelectPolyfill extends HTMLElement {
   }
 
   mutationObserverCallback(mutationList) {
-    let childrenChanged = false;
+    let needsSlotAssignment = false;
+    let selectedOptionChanged = false;
+
     for (const mutation of mutationList) {
-      if (mutation.type === 'childList') {
-        childrenChanged = true;
+      if (mutation.type == 'childList' && mutation.target == this) {
+        needsSlotAssignment = true;
+      }
+
+      for (let ancestor = mutation.target;
+           ancestor && !(ancestor instanceof CustomizableSelectPolyfill);
+           ancestor = ancestor.parentNode) {
+        if (ancestor == this.selectedOption) {
+          selectedOptionChanged = true;
+        }
       }
     }
-    if (childrenChanged) {
+
+    if (needsSlotAssignment) {
       this.manuallyAssignSlots();
+    }
+
+    if (selectedOptionChanged) {
+      this.innerElement.textContent = this.selectedOption.textContent;
     }
   }
 
@@ -135,6 +158,31 @@ class CustomizableSelectPolyfill extends HTMLElement {
 
   selectedcontentRemoved(selectedcontent) {
     this.descendantSelectedcontents.delete(selectedcontent);
+  }
+
+  optionAdded(option) {
+    this.options.add(option);
+    if (!this.selectedOption || option.hasAttribute('selected')) {
+      this.selectOption(option);
+    }
+  }
+
+  optionRemoved(option) {
+    this.options.delete(option);
+    if (option == this.selectedOption) {
+      this.selectOption(null);
+    }
+  }
+
+  selectOption(option) {
+    if (!option && this.options.size()) {
+      option = this.options[0];
+    }
+    this.selectedOption = option;
+    this.innerElement.textContent = option
+      ? option.textContent
+      : '';
+    this.dispatchEvent(new Event('change'));
   }
 
   // TODO add getters like value, selectedOptions, etc.
@@ -166,14 +214,26 @@ class CustomizableSelectPolyfillOption extends HTMLElement {
       }
     `;
     root.appendChild(style);
+
+    this.select = null;
   }
 
   connectedCallback() {
     this.setAttribute('tabindex', '0');
+
+    this.select = firstAncestorSelect(this);
+    if (this.select) {
+      this.select.optionAdded(this);
+    }
+
     // TODO add event listeners
   }
 
   disconnectedCallback() {
+    if (this.select) {
+      this.select.optionRemoved(this);
+      this.select = null;
+    }
   }
 };
 
@@ -205,23 +265,23 @@ class CustomizableSelectPolyfillOptgroup extends HTMLElement {
 
 class CustomizableSelectPolyfillSelectedContent extends HTMLElement {
   connectedCallback() {
-    this.select = this.firstAncestorSelect();
+    this.select = firstAncestorSelect(this);
     this.select.selectedcontentAdded(this);
   }
 
   disconnectedCallback() {
     this.select.selectedcontentRemoved(this);
   }
-
-  firstAncestorSelect() {
-    for (let parent = this.parentNode; parent; parent = parent.parentNode) {
-      if (parent instanceof CustomizableSelectPolyfill) {
-        return parent;
-      }
-    }
-    return null;
-  }
 };
+
+function firstAncestorSelect(node) {
+  for (let parent = node.parentNode; parent; parent = parent.parentNode) {
+    if (parent instanceof CustomizableSelectPolyfill) {
+      return parent;
+    }
+  }
+  return null;
+}
 
 customElements.define('customizable-select-polyfill', CustomizableSelectPolyfill);
 customElements.define('customizable-select-polyfill-option', CustomizableSelectPolyfillOption);
